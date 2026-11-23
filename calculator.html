@@ -35,13 +35,13 @@
     </section>
     <div class="keys">
       <button class="utility" data-action="clear" aria-label="Clear">AC</button>
-      <button class="utility" data-action="sign" aria-label="Change sign">+/âˆ’</button>
-      <button class="utility" data-action="backspace" aria-label="Backspace">âŒ«</button>
-      <button class="operator" data-op="Ã·" aria-label="Divide">Ã·</button>
+      <button class="utility" data-action="sign" aria-label="Change sign">+/−</button>
+      <button class="utility" data-action="backspace" aria-label="Backspace">⌫</button>
+      <button class="operator" data-op="÷" aria-label="Divide">÷</button>
       <button data-digit="7">7</button><button data-digit="8">8</button><button data-digit="9">9</button>
-      <button class="operator" data-op="Ã—" aria-label="Multiply">Ã—</button>
+      <button class="operator" data-op="×" aria-label="Multiply">×</button>
       <button data-digit="4">4</button><button data-digit="5">5</button><button data-digit="6">6</button>
-      <button class="operator" data-op="âˆ’" aria-label="Subtract">âˆ’</button>
+      <button class="operator" data-op="−" aria-label="Subtract">−</button>
       <button data-digit="1">1</button><button data-digit="2">2</button><button data-digit="3">3</button>
       <button class="operator" data-op="+" aria-label="Add">+</button>
       <button class="zero" data-digit="0">0</button><button data-action="decimal">.</button>
@@ -53,7 +53,7 @@
       const display = document.getElementById('display');
       const expression = document.getElementById('expression');
       let current = '0', stored = null, operation = null, replace = false, finished = false;
-      const symbols = { '+': '+', 'âˆ’': 'âˆ’', 'Ã—': 'Ã—', 'Ã·': 'Ã·' };
+      const symbols = { '+': '+', '−': '−', '×': '×', '÷': '÷' };
       function render() { display.textContent = current; }
       function reset() { current = '0'; stored = null; operation = null; replace = false; finished = false; expression.textContent = ''; render(); }
       function number(value) {
@@ -65,9 +65,9 @@
       }
       function calculate(a, b, op) {
         if (op === '+') return a + b;
-        if (op === 'âˆ’') return a - b;
-        if (op === 'Ã—') return a * b;
-        if (op === 'Ã·') return b === 0 ? NaN : a / b;
+        if (op === '−') return a - b;
+        if (op === '×') return a * b;
+        if (op === '÷') return b === 0 ? NaN : a / b;
       }
       function format(value) {
         if (!Number.isFinite(value)) return 'Error';
@@ -105,9 +105,9 @@
         if (/^[0-9]$/.test(event.key)) number(event.key);
         else if (event.key === '.') number('.');
         else if (event.key === '+') choose('+');
-        else if (event.key === '-') choose('âˆ’');
-        else if (event.key === '*') choose('Ã—');
-        else if (event.key === '/') { event.preventDefault(); choose('Ã·'); }
+        else if (event.key === '-') choose('−');
+        else if (event.key === '*') choose('×');
+        else if (event.key === '/') { event.preventDefault(); choose('÷'); }
         else if (event.key === 'Enter' || event.key === '=') { event.preventDefault(); equals(); }
         else if (event.key === 'Escape') reset();
         else if (event.key === 'Backspace') act('backspace');
@@ -116,4 +116,3 @@
   </script>
 </body>
 </html>
-

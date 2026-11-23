@@ -3,144 +3,117 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Calculator</title>
+  <title>Simple Calculator</title>
   <style>
+    :root { color-scheme: light; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
     * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      min-height: 100vh;
-      display: grid;
-      place-items: center;
-      padding: 16px;
-      background: #eef1f5;
-      color: #172033;
-      font: 1rem system-ui, sans-serif;
-    }
-    main {
-      width: min(100%, 340px);
-      padding: 20px;
-      background: white;
-      border: 1px solid #dce2eb;
-      border-radius: 16px;
-    }
-    h1 { margin: 0 0 16px; font-size: 1.25rem; }
-    output {
-      display: block;
-      margin-bottom: 12px;
-      padding: 12px;
-      border-radius: 8px;
-      background: #eef1f5;
-      text-align: right;
-      overflow-wrap: anywhere;
-      font-size: 1.75rem;
-      font-variant-numeric: tabular-nums;
-    }
-    .keys { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-    button {
-      min-height: 48px;
-      border: 0;
-      border-radius: 8px;
-      background: #eef1f5;
-      color: inherit;
-      font: inherit;
-      font-size: 1.125rem;
-      cursor: pointer;
-    }
-    button:hover { filter: brightness(.93); }
-    button:focus-visible { outline: 2px solid #2149ad; outline-offset: 2px; }
-    .operator { background: #dce7ff; }
-    .equals { background: #2149ad; color: white; }
-    .wide { grid-column: span 2; }
+    body { min-height: 100vh; margin: 0; display: grid; place-items: center; padding: 24px; background: #eef2f8; color: #172033; }
+    .calculator { width: min(100%, 350px); padding: 22px; border-radius: 24px; background: #fff; box-shadow: 0 18px 50px #263b5a1c; }
+    h1 { margin: 0 0 18px; font-size: 1.1rem; font-weight: 650; letter-spacing: .01em; }
+    .screen { min-height: 100px; margin-bottom: 16px; padding: 14px 16px; display: flex; flex-direction: column; justify-content: flex-end; align-items: flex-end; overflow: hidden; border-radius: 15px; background: #f4f6fa; }
+    .expression { min-height: 1.4em; max-width: 100%; overflow: hidden; color: #788398; font-size: .95rem; text-overflow: ellipsis; white-space: nowrap; }
+    .display { max-width: 100%; overflow: hidden; font-size: 2.5rem; font-weight: 550; line-height: 1.15; text-overflow: ellipsis; white-space: nowrap; }
+    .keys { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    button { min-height: 58px; border: 0; border-radius: 14px; background: #f0f3f8; color: #253149; font: inherit; font-size: 1.2rem; cursor: pointer; transition: transform .08s, background .15s; }
+    button:hover { background: #e4e9f2; }
+    button:active { transform: scale(.96); }
+    button:focus-visible { outline: 3px solid #7798ff; outline-offset: 2px; }
+    .utility { background: #e8edf6; color: #53617a; }
+    .operator { background: #e9efff; color: #3158c9; font-size: 1.35rem; }
+    .equals { grid-row: span 2; background: #4267e8; color: #fff; font-size: 1.5rem; }
+    .equals:hover { background: #3459dc; }
+    .zero { grid-column: span 2; }
+    @media (max-width: 380px) { .calculator { padding: 16px; } .keys { gap: 8px; } button { min-height: 54px; } }
   </style>
 </head>
 <body>
-  <main aria-labelledby="title">
-    <h1 id="title">Calculator</h1>
-    <output id="display" aria-label="Calculator display">0</output>
+  <main class="calculator" aria-label="Calculator">
+    <h1>Calculator</h1>
+    <section class="screen" aria-live="polite" aria-atomic="true">
+      <div class="expression" id="expression"></div>
+      <div class="display" id="display">0</div>
+    </section>
     <div class="keys">
-      <button class="wide" data-key="clear" aria-label="Clear">C</button>
-      <button data-key="delete" aria-label="Delete last digit">⌫</button>
-      <button class="operator" data-key="/" aria-label="Divide">÷</button>
-      <button data-key="7">7</button>
-      <button data-key="8">8</button>
-      <button data-key="9">9</button>
-      <button class="operator" data-key="*" aria-label="Multiply">×</button>
-      <button data-key="4">4</button>
-      <button data-key="5">5</button>
-      <button data-key="6">6</button>
-      <button class="operator" data-key="-" aria-label="Subtract">−</button>
-      <button data-key="1">1</button>
-      <button data-key="2">2</button>
-      <button data-key="3">3</button>
-      <button class="operator" data-key="+" aria-label="Add">+</button>
-      <button class="wide" data-key="0">0</button>
-      <button data-key="." aria-label="Decimal point">.</button>
-      <button class="equals" data-key="=" aria-label="Equals">=</button>
+      <button class="utility" data-action="clear" aria-label="Clear">AC</button>
+      <button class="utility" data-action="sign" aria-label="Change sign">+/âˆ’</button>
+      <button class="utility" data-action="backspace" aria-label="Backspace">âŒ«</button>
+      <button class="operator" data-op="Ã·" aria-label="Divide">Ã·</button>
+      <button data-digit="7">7</button><button data-digit="8">8</button><button data-digit="9">9</button>
+      <button class="operator" data-op="Ã—" aria-label="Multiply">Ã—</button>
+      <button data-digit="4">4</button><button data-digit="5">5</button><button data-digit="6">6</button>
+      <button class="operator" data-op="âˆ’" aria-label="Subtract">âˆ’</button>
+      <button data-digit="1">1</button><button data-digit="2">2</button><button data-digit="3">3</button>
+      <button class="operator" data-op="+" aria-label="Add">+</button>
+      <button class="zero" data-digit="0">0</button><button data-action="decimal">.</button>
+      <button class="equals" data-action="equals" aria-label="Equals">=</button>
     </div>
   </main>
   <script>
-    const display = document.querySelector('#display');
-    const operations = {
-      '+': (left, right) => left + right,
-      '-': (left, right) => left - right,
-      '*': (left, right) => left * right,
-      '/': (left, right) => left / right
-    };
-    let entry = '0';
-    let subtotal = 0;
-    let pending = null;
-    let replaceEntry = false;
-
-    function applyPending() {
-      const result = operations[pending](subtotal, Number(entry));
-      entry = Number.isFinite(result) ? String(Number(result.toPrecision(15))) : 'Error';
-      pending = null;
-      replaceEntry = true;
-    }
-
-    function press(key) {
-      if (key === 'clear') {
-        entry = '0';
-        pending = null;
-        replaceEntry = false;
-      } else if (key === 'delete') {
-        if (!replaceEntry) entry = entry.slice(0, -1) || '0';
-      } else if (key === '.' || /^[0-9]$/.test(key)) {
-        if (replaceEntry) entry = '0';
-        replaceEntry = false;
-        if (key === '.') {
-          if (!entry.includes('.')) entry += '.';
-        } else if (entry.length < 15) {
-          entry = entry === '0' ? key : entry + key;
-        }
-      } else if (key === '=') {
-        if (pending && !replaceEntry) applyPending();
-      } else if (Object.hasOwn(operations, key)) {
-        if (pending && !replaceEntry) applyPending();
-        if (entry !== 'Error') {
-          subtotal = Number(entry);
-          pending = key;
-          replaceEntry = true;
-        }
+    (() => {
+      const display = document.getElementById('display');
+      const expression = document.getElementById('expression');
+      let current = '0', stored = null, operation = null, replace = false, finished = false;
+      const symbols = { '+': '+', 'âˆ’': 'âˆ’', 'Ã—': 'Ã—', 'Ã·': 'Ã·' };
+      function render() { display.textContent = current; }
+      function reset() { current = '0'; stored = null; operation = null; replace = false; finished = false; expression.textContent = ''; render(); }
+      function number(value) {
+        if (current === 'Error' || replace || finished) { current = value === '.' ? '0.' : value; replace = false; finished = false; expression.textContent = ''; }
+        else if (value === '.' && current.includes('.')) return;
+        else if (current === '0' && value !== '.') current = value;
+        else if (current.length < 14) current += value;
+        render();
       }
-      display.textContent = entry;
-    }
-
-    document.querySelector('.keys').addEventListener('click', event => {
-      const button = event.target.closest('button');
-      if (button) press(button.dataset.key);
-    });
-
-    document.addEventListener('keydown', event => {
-      if (event.ctrlKey || event.metaKey || event.altKey) return;
-      const shortcuts = { Enter: '=', Escape: 'clear', Backspace: 'delete' };
-      if (event.key === 'Enter' && event.target instanceof HTMLButtonElement) return;
-      const key = shortcuts[event.key] ?? event.key;
-      if (/^[0-9.+*/=-]$/.test(key) || key === 'clear' || key === 'delete') {
-        event.preventDefault();
-        press(key);
+      function calculate(a, b, op) {
+        if (op === '+') return a + b;
+        if (op === 'âˆ’') return a - b;
+        if (op === 'Ã—') return a * b;
+        if (op === 'Ã·') return b === 0 ? NaN : a / b;
       }
-    });
+      function format(value) {
+        if (!Number.isFinite(value)) return 'Error';
+        return String(Number(value.toPrecision(11)));
+      }
+      function choose(op) {
+        if (current === 'Error') reset();
+        if (operation && !replace) {
+          const result = calculate(stored, Number(current), operation);
+          current = format(result); render(); stored = current === 'Error' ? null : Number(current);
+        } else stored = Number(current);
+        operation = op; replace = true; finished = false;
+        expression.textContent = `${current} ${symbols[op]}`;
+      }
+      function equals() {
+        if (!operation || stored === null || current === 'Error') return;
+        const left = stored, right = Number(current), op = operation;
+        expression.textContent = `${left} ${symbols[op]} ${right} =`;
+        current = format(calculate(left, right, op)); operation = null; stored = null; replace = true; finished = true; render();
+      }
+      function act(action) {
+        if (action === 'clear') reset();
+        if (action === 'decimal') number('.');
+        if (action === 'equals') equals();
+        if (action === 'sign' && current !== '0' && current !== 'Error') { current = current.startsWith('-') ? current.slice(1) : '-' + current; render(); }
+        if (action === 'backspace' && current !== 'Error' && !replace) { current = current.length > 1 ? current.slice(0, -1) : '0'; if (current === '-') current = '0'; render(); }
+      }
+      document.querySelector('.keys').addEventListener('click', event => {
+        const button = event.target.closest('button'); if (!button) return;
+        if (button.dataset.digit !== undefined) number(button.dataset.digit);
+        else if (button.dataset.op) choose(button.dataset.op);
+        else if (button.dataset.action) act(button.dataset.action);
+      });
+      document.addEventListener('keydown', event => {
+        if (/^[0-9]$/.test(event.key)) number(event.key);
+        else if (event.key === '.') number('.');
+        else if (event.key === '+') choose('+');
+        else if (event.key === '-') choose('âˆ’');
+        else if (event.key === '*') choose('Ã—');
+        else if (event.key === '/') { event.preventDefault(); choose('Ã·'); }
+        else if (event.key === 'Enter' || event.key === '=') { event.preventDefault(); equals(); }
+        else if (event.key === 'Escape') reset();
+        else if (event.key === 'Backspace') act('backspace');
+      });
+    })();
   </script>
 </body>
 </html>
+

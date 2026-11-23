@@ -20,7 +20,8 @@
     button:focus-visible { outline: 3px solid #7798ff; outline-offset: 2px; }
     .utility { background: #e8edf6; color: #53617a; }
     .operator { background: #e9efff; color: #3158c9; font-size: 1.35rem; }
-    .equals { grid-row: span 2; background: #4267e8; color: #fff; font-size: 1.5rem; }
+    .clear { grid-column: span 2; }
+    .equals { background: #4267e8; color: #fff; font-size: 1.5rem; }
     .equals:hover { background: #3459dc; }
     .zero { grid-column: span 2; }
     @media (max-width: 380px) { .calculator { padding: 16px; } .keys { gap: 8px; } button { min-height: 54px; } }
@@ -34,14 +35,13 @@
       <div class="display" id="display">0</div>
     </section>
     <div class="keys">
-      <button class="utility" data-action="clear" aria-label="Clear">AC</button>
+      <button class="utility clear" data-action="clear" aria-label="Clear">AC</button>
       <button class="utility" data-action="sign" aria-label="Change sign">+/−</button>
       <button class="utility" data-action="backspace" aria-label="Backspace">⌫</button>
-      <button class="operator" data-op="÷" aria-label="Divide">÷</button>
       <button data-digit="7">7</button><button data-digit="8">8</button><button data-digit="9">9</button>
-      <button class="operator" data-op="×" aria-label="Multiply">×</button>
+      <button class="operator" data-op="*" aria-label="Multiply">×</button>
       <button data-digit="4">4</button><button data-digit="5">5</button><button data-digit="6">6</button>
-      <button class="operator" data-op="−" aria-label="Subtract">−</button>
+      <button class="operator" data-op="-" aria-label="Subtract">−</button>
       <button data-digit="1">1</button><button data-digit="2">2</button><button data-digit="3">3</button>
       <button class="operator" data-op="+" aria-label="Add">+</button>
       <button class="zero" data-digit="0">0</button><button data-action="decimal">.</button>
@@ -53,7 +53,7 @@
       const display = document.getElementById('display');
       const expression = document.getElementById('expression');
       let current = '0', stored = null, operation = null, replace = false, finished = false;
-      const symbols = { '+': '+', '−': '−', '×': '×', '÷': '÷' };
+      const symbols = { '+': '+', '-': '\u2212', '*': '\u00D7' };
       function render() { display.textContent = current; }
       function reset() { current = '0'; stored = null; operation = null; replace = false; finished = false; expression.textContent = ''; render(); }
       function number(value) {
@@ -65,9 +65,8 @@
       }
       function calculate(a, b, op) {
         if (op === '+') return a + b;
-        if (op === '−') return a - b;
-        if (op === '×') return a * b;
-        if (op === '÷') return b === 0 ? NaN : a / b;
+        if (op === '-') return a - b;
+        if (op === '*') return a * b;
       }
       function format(value) {
         if (!Number.isFinite(value)) return 'Error';
@@ -105,9 +104,8 @@
         if (/^[0-9]$/.test(event.key)) number(event.key);
         else if (event.key === '.') number('.');
         else if (event.key === '+') choose('+');
-        else if (event.key === '-') choose('−');
-        else if (event.key === '*') choose('×');
-        else if (event.key === '/') { event.preventDefault(); choose('÷'); }
+        else if (event.key === '-') choose('-');
+        else if (event.key === '*') choose('*');
         else if (event.key === 'Enter' || event.key === '=') { event.preventDefault(); equals(); }
         else if (event.key === 'Escape') reset();
         else if (event.key === 'Backspace') act('backspace');

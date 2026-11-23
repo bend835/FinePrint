@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f3ef">
+  <title>Steven and Katelyn</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f5f3ef;
+      color: #242321;
+    }
+    * { box-sizing: border-box; }
+    body {
+      min-height: 100svh;
+      margin: 0;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background: radial-gradient(ellipse at 50% 0%, #fffdf9 0, #f5f3ef 64%);
+    }
+    .calculator {
+      width: min(100%, 360px);
+      padding: 22px;
+      border: 1px solid #e7e3dc;
+      border-radius: 28px;
+      background: #fffefa;
+      box-shadow: 0 24px 70px #34312615, 0 3px 10px #3431260a;
+    }
+    .topline {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1px 3px 18px;
+      color: #858178;
+      font-size: 12px;
+      font-weight: 650;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: #92aa80; box-shadow: 0 0 0 4px #92aa801f; }
+    .screen {
+      min-height: 132px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      justify-content: flex-end;
+      overflow: hidden;
+      padding: 12px 4px 22px;
+      text-align: right;
+    }
+    .previous {
+      min-height: 24px;
+      max-width: 100%;
+      overflow: hidden;
+      color: #969188;
+      font-size: 15px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .current {
+      width: 100%;
+      overflow: hidden;
+      color: #292824;
+      font-size: clamp(42px, 13vw, 58px);
+      font-weight: 350;
+      letter-spacing: -.055em;
+      line-height: 1.15;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .keys { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    button {
+      min-width: 0;
+      aspect-ratio: 1.2;
+      border: 0;
+      border-radius: 17px;
+      background: #f1efea;
+      color: #34322e;
+      font: inherit;
+      font-size: 20px;
+      font-weight: 550;
+      cursor: pointer;
+      transition: transform .12s ease, background .12s ease, box-shadow .12s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    button:hover { background: #e9e6df; }
+    button:active { transform: scale(.95); }
+    button:focus-visible { outline: 3px solid #83956f; outline-offset: 2px; }
+    .utility { background: #e8e5de; color: #68655e; }
+    .operator { background: #e9eee3; color: #61714f; font-size: 23px; }
+    .operator.selected { background: #d8e2ce; }
+    .equals { background: #71845e; color: #fff; font-size: 24px; }
+    .equals:hover { background: #63764f; }
+    .zero { grid-column: span 2; aspect-ratio: auto; }
+    @media (max-width: 380px) {
+      .calculator { padding: 17px; border-radius: 24px; }
+      .keys { gap: 8px; }
+      button { border-radius: 14px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="calculator" aria-label="Calculator">
+    <div class="topline"><span>Steven and Katelyn</span><span class="dot" aria-hidden="true"></span></div>
+    <section class="screen" aria-live="polite" aria-atomic="true">
+      <div class="previous" id="previous"></div>
+      <div class="current" id="display">0</div>
+    </section>
+    <div class="keys" aria-label="Calculator keys">
+      <button class="utility" data-action="clear" aria-label="Clear">AC</button>
+      <button class="utility" data-action="sign" aria-label="Change sign">±</button>
+      <button class="utility" data-action="percent" aria-label="Percent">%</button>
+      <button class="operator" data-operator="÷" aria-label="Divide">÷</button>
+      <button data-digit="7">7</button><button data-digit="8">8</button><button data-digit="9">9</button>
+      <button class="operator" data-operator="×" aria-label="Multiply">×</button>
+      <button data-digit="4">4</button><button data-digit="5">5</button><button data-digit="6">6</button>
+      <button class="operator" data-operator="−" aria-label="Subtract">−</button>
+      <button data-digit="1">1</button><button data-digit="2">2</button><button data-digit="3">3</button>
+      <button class="operator" data-operator="+" aria-label="Add">+</button>
+      <button class="zero" data-digit="0">0</button><button data-action="decimal" aria-label="Decimal point">.</button>
+      <button class="equals" data-action="equals" aria-label="Equals">=</button>
+    </div>
+  </main>
+  <script>
+    (() => {
+      const display = document.querySelector('#display');
+      const previous = document.querySelector('#previous');
+      const buttons = document.querySelector('.keys');
+      let value = '0';
+      let stored = null;
+      let operator = null;
+      let replaceValue = false;
+      let justCalculated = false;
+
+      const render = () => {
+        display.textContent = value;
+        previous.textContent = stored !== null && operator ? `${format(stored)} ${operator}` : '';
+        document.querySelectorAll('.operator').forEach(button => {
+          button.classList.toggle('selected', button.dataset.operator === operator);
+        });
+        const clearButton = document.querySelector('[data-action="clear"]');
+        clearButton.textContent = value === '0' && stored === null ? 'AC' : 'C';
+      };
+      const format = number => String(Number(number.toPrecision(10)));
+      const inputDigit = digit => {
+        if (replaceValue || justCalculated) {
+          value = digit;
+          replaceValue = false;
+          justCalculated = false;
+        } else if (value === '0') value = digit;
+        else if (value.replace('-', '').length < 12) value += digit;
+        render();
+      };
+      const calculate = (a, op, b) => {
+        switch (op) {
+          case '+': return a + b;
+          case '−': return a - b;
+          case '×': return a * b;
+          case '÷': return b === 0 ? null : a / b;
+          default: return b;
+        }
+      };
+      const chooseOperator = next => {
+        const current = Number(value);
+        if (operator && !replaceValue) {
+          const result = calculate(stored, operator, current);
+          if (result === null || !Number.isFinite(result)) {
+            value = 'Error'; stored = null; operator = null; replaceValue = true; render(); return;
+          }
+          value = format(result);
+        }
+        stored = Number(value);
+        operator = next;
+        replaceValue = true;
+        justCalculated = false;
+        render();
+      };
+      const equals = () => {
+        if (operator === null || stored === null) return;
+        const result = calculate(stored, operator, Number(value));
+        previous.textContent = `${format(stored)} ${operator} ${value} =`;
+        if (result === null || !Number.isFinite(result)) value = 'Error';
+        else value = format(result);
+        stored = null; operator = null; replaceValue = true; justCalculated = true;
+        render();
+      };
+      const act = action => {
+        if (value === 'Error' && action !== 'clear') { value = '0'; stored = null; operator = null; }
+        switch (action) {
+          case 'clear':
+            if (value !== '0' || stored !== null) value = '0';
+            else { stored = null; operator = null; }
+            replaceValue = false; justCalculated = false; break;
+          case 'decimal':
+            if (replaceValue || justCalculated) { value = '0.'; replaceValue = false; justCalculated = false; }
+            else if (!value.includes('.')) value += '.';
+            break;
+          case 'sign': if (value !== '0') value = value.startsWith('-') ? value.slice(1) : `-${value}`; break;
+          case 'percent': value = format(Number(value) / 100); break;
+          case 'equals': equals(); return;
+        }
+        render();
+      };
+      buttons.addEventListener('click', event => {
+        const button = event.target.closest('button');
+        if (!button) return;
+        if (button.dataset.digit !== undefined) inputDigit(button.dataset.digit);
+        else if (button.dataset.operator) chooseOperator(button.dataset.operator);
+        else if (button.dataset.action) act(button.dataset.action);
+      });
+      document.addEventListener('keydown', event => {
+        if (/^[0-9]$/.test(event.key)) inputDigit(event.key);
+        else if (event.key === '.') act('decimal');
+        else if (event.key === 'Enter' || event.key === '=') { event.preventDefault(); act('equals'); }
+        else if (event.key === 'Escape' || event.key === 'Delete') act('clear');
+        else if (event.key === 'Backspace') {
+          if (!replaceValue && value !== 'Error') value = value.length <= 1 || (value.length === 2 && value.startsWith('-')) ? '0' : value.slice(0, -1);
+          render();
+        } else {
+          const map = { '+': '+', '-': '−', '*': '×', '/': '÷' };
+          if (map[event.key]) { event.preventDefault(); chooseOperator(map[event.key]); }
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

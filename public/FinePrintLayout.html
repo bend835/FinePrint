@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Fine Print</title>
+        <link rel="stylesheet" href="FinePrintStyle.css">
+    </head>
+    <body>
+        <header>
+            <h1>Fine Print!</h1>
+            <h2>Understand Before You Agree</h2>
+        </header>
+        <button id="summarize_button" class="btn">Summarize!</button>
+        <button id="clear_button" class="btn">Clear</button>
+        <button id="why_button" class="btn">Why use our website!</button>
+        <section class="flex-container">
+            <section>
+                <h3>Inputted Terms And Conditions</h3>
+                <div class="rgb_box">
+                    <textarea id="input-box" placeholder="Input the terms and conditions"></textarea>
+                </div>
+            </section>
+            <section>
+                <h3>Summarized Terms And Conditions</h3>
+                <div class="rgb_box">
+                    <div id="output-box" class="vertical-scroll"></div>
+                </div>
+            </section>
+        </section>
+        <script src="UIManager.js"></script>
+    </body>
+</html>
